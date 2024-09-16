@@ -7,7 +7,6 @@ export const ReactQuery = () => {
   const { mutate: addTodoMutation } = useAddTodo();
 
   const addTodo = (event: React.MouseEvent<HTMLButtonElement>) => {
-    console.log("addTodo");
     addTodoMutation({ title: todo });
   };
 

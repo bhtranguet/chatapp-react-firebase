@@ -22,7 +22,6 @@ const todoList = [
 ];
 
 export const fetchAllTodoList = async () => {
-  console.log("fetchTodoList");
   return todoList;
 };
 
