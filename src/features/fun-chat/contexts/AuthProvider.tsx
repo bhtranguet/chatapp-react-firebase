@@ -16,10 +16,10 @@ interface AuthProviderProps {
 }
 
 interface User {
-  displayName?: string | null;
-  email?: string | null;
+  displayName?: string;
+  email?: string;
   uid: string;
-  photoURL?: string | null;
+  photoURL?: string;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
@@ -34,10 +34,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (user) {
         const { displayName, email, uid, photoURL } = user;
         setUser({
-          displayName,
-          email,
+          displayName: displayName || undefined,
+          email: email || undefined,
           uid,
-          photoURL,
+          photoURL: photoURL || undefined,
         });
         setIsLoading(false);
         navigate("/fun-chat");

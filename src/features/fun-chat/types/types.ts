@@ -3,20 +3,31 @@ export enum RoomType {
   ROOM = "room",
 }
 
-export type Room = {
-  id?: string;
+export type RoomEntity = {
+  id: string;
   type: RoomType;
   name?: string;
   description?: string;
-  memberIds?: string[];
+  memberIds: string[];
 };
 
-export type User = {
-  id?: string;
-  displayName: string;
-  email: string;
-  photoURL: string;
+export type UserEntity = {
+  id: string;
+  displayName?: string;
+  email?: string;
+  photoURL?: string;
   uid: string;
-  providerId: string;
-  keywords: string[];
+  providerId?: string;
+  keywords?: string[];
 };
+
+export type MessageEntity = {
+  id: string;
+  userId: string;
+  roomId: string;
+  text: string;
+  photoURL?: string;
+  displayName?: string;
+};
+
+export type CreateMessageEntity = Partial<MessageEntity>;

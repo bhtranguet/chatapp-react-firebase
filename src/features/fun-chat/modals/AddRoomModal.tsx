@@ -4,7 +4,7 @@ import { Button, Form, Input, Modal } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { addDocument } from "../../../utils";
 import { AuthContext } from "../contexts";
-import { Room } from "../types/types";
+import { RoomEntity, RoomType } from "../types/types";
 
 type FieldType = {
   name: string;
@@ -33,7 +33,11 @@ function AddRoomModal() {
 
   const handleOk = async () => {
     const formData = form.getFieldsValue();
-    addDocument<Room>("rooms", { ...formData, memberIds: [user.uid] });
+    addDocument<RoomEntity>("rooms", {
+      ...formData,
+      memberIds: [user.uid],
+      type: RoomType.ROOM,
+    });
     setIsAddRoomModalOpen(false);
     form.resetFields();
   };

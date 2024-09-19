@@ -1,18 +1,22 @@
-import { UserAddOutlined } from "@ant-design/icons";
+import { PhoneFilled, UserAddOutlined } from "@ant-design/icons";
 import { useContext, useMemo, useRef, useState } from "react";
 import { AppContext } from "../../../../contexts/AppProvider";
 import _ from "lodash";
-import { Alert, Avatar, Button, Form, Input, InputRef, Tooltip } from "antd";
+import { Alert, Avatar, Button, Input, InputRef, Tooltip } from "antd";
 import Message from "./components/Message";
 import { AuthContext } from "../../../../contexts/AuthProvider";
-import { addDocument } from "../../../../../../utils";
-import useFirestore, {
-  QueryCondition,
-} from "../../../../../../hooks/firebase/useFirestore";
+import { addDocument, queryDocuments } from "../../../../../../utils";
+import useFirestore from "../../../../../../hooks/firebase/useFirestore";
+import { where } from "firebase/firestore";
+import { CreateMessageEntity, RoomType } from "../../../../types/types";
 
 function ChatWindow() {
-  const { selectedRoom, members, setIsInviteMemberModalOpen } =
-    useContext(AppContext);
+  const {
+    selectedRoom,
+    selectedRoomId,
+    roomMembers,
+    setIsInviteMemberModalOpen,
+  } = useContext(AppContext);
 
   const {
     user: { uid, photoURL, displayName },
@@ -22,26 +26,20 @@ function ChatWindow() {
 
   const inputRef = useRef<InputRef>(null);
 
-  const condition = useMemo(
-    () =>
-      ({
-        fieldName: "roomId",
-        operator: "==",
-        compareValue: _.get(selectedRoom, "id"),
-      } as QueryCondition),
-    [_.get(selectedRoom, "id")]
+  const messages = useFirestore(
+    "messages",
+    useMemo(() => [where("roomId", "==", selectedRoomId)], [selectedRoomId])
   );
 
-  const messages = useFirestore("messages", useMemo(() => [], selectedRoom.id));
-
   const handleSendMessage = async () => {
-    addDocument("messages", {
+    await addDocument<CreateMessageEntity>("messages", {
+      userId: uid,
+      roomId: selectedRoomId,
       text: messageText,
-      uid,
       photoURL,
-      roomId: _.get(selectedRoom, "id"),
       displayName,
     });
+
     setMessageText("");
     // focus to input again after submit
     if (inputRef?.current) {
@@ -50,6 +48,8 @@ function ChatWindow() {
       });
     }
   };
+
+  const members = queryDocuments('rooms', [])
 
   return (
     <>
@@ -63,6 +63,14 @@ function ChatWindow() {
               </div>
               <div className="flex items-center">
                 <Button
+                  type="primary"
+                  size="small"
+                  shape="circle"
+                  icon={<PhoneFilled />}
+                  className="mr-2"
+                />
+                <Button
+                  hidden={selectedRoom?.type === RoomType.DIRECT_MESSAGE}
                   type="dashed"
                   icon={<UserAddOutlined />}
                   iconPosition="end"
@@ -72,8 +80,8 @@ function ChatWindow() {
                 >
                   Mời
                 </Button>
-                <Avatar.Group className="pl-1" size="small" maxCount={2}>
-                  {members.map((member, index) => (
+                <Avatar.Group className="pl-1" size="small">
+                  {roomMembers.map((member, index) => (
                     <Tooltip title={_.get(member, "displayName")} key={index}>
                       <Avatar src={_.get(member, "photoURL")} />
                     </Tooltip>

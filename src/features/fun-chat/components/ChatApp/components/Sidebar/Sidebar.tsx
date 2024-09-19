@@ -1,3 +1,4 @@
+import DirectMessageList from "./components/DirectMessageList";
 import RoomList from "./components/RoomList";
 import UserInfo from "./components/UserInfo";
 
@@ -10,6 +11,7 @@ function Sidebar() {
         </div>
         <div>
           <RoomList />
+          <DirectMessageList />
         </div>
       </div>
     </>

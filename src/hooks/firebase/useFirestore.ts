@@ -19,11 +19,16 @@ export interface QueryCondition {
 function useFirestore<T>(
   collectionName: string,
   conditions: QueryFieldFilterConstraint[],
-  pathSegments: Array<string> = []
+  pathSegments: Array<string> = [],
+  forceReturnEmpty: boolean = false
 ) {
   const [documents, setDocuments] = useState<T[]>([]);
 
   useEffect(() => {
+    if (forceReturnEmpty) {
+      setDocuments([]);
+      return;
+    }
     const q = query(
       collection(db, collectionName, ...pathSegments),
       ...conditions,

@@ -1,9 +1,8 @@
-import { PlusSquareOutlined } from "@ant-design/icons";
+import { CaretDownFilled, PlusSquareOutlined } from "@ant-design/icons";
 import { Button, Typography } from "antd";
 import { useContext } from "react";
 import { AppContext } from "../../../../../contexts/AppProvider";
 import _ from "lodash";
-import { AuthContext } from "../../../../../contexts";
 
 function DirectMessageList() {
   const {
@@ -13,48 +12,35 @@ function DirectMessageList() {
     directMessages,
   } = useContext(AppContext);
 
-  const { user } = useContext(AuthContext);
-
   return (
     <>
       <div className="text-white px-4 py-3">
+        <CaretDownFilled className="mr-2" />
         Danh sách cuộc trò chuyện
         <div className="pl-4 pt-4">
-          {directMessages.map((directMessages, index) => {
-            const otherUserId = _.find(
-              directMessages.memberIds,
-              (memberId) => memberId !== user.id
-            );
-
-            const otherUser = _.find(
-              directMessages.members,
-              (member) => member.id === otherUserId
-            );
-
-            console.log(otherUserId, otherUser);
-
+          {directMessages.map((room, index) => {
             return (
               <div key={index}>
-                {selectedRoomId === _.get(directMessages, "id") ? (
+                {selectedRoomId === _.get(room, "id") ? (
                   <>
                     <Typography.Text
                       onClick={() => {
-                        setSelectedRoomId(_.get(directMessages, "id", ""));
+                        setSelectedRoomId(_.get(room, "id", ""));
                       }}
                       className="block text-blue-600 font-bold cursor-pointer mb-2"
                     >
-                      {otherUser?.displayName}
+                      {room.name}
                     </Typography.Text>
                   </>
                 ) : (
                   <>
                     <Typography.Text
                       onClick={() => {
-                        setSelectedRoomId(_.get(directMessages, "id", ""));
+                        setSelectedRoomId(_.get(room, "id", ""));
                       }}
                       className="block text-white cursor-pointer mb-2"
                     >
-                      {otherUser?.displayName}
+                      {room.name}
                     </Typography.Text>
                   </>
                 )}
@@ -69,7 +55,7 @@ function DirectMessageList() {
               setAddDirectMessageModalOpen(true);
             }}
           >
-            Thêm
+            Thêm cuộc trò chuyện
           </Button>
         </div>
       </div>

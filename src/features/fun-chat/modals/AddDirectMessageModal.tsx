@@ -14,7 +14,7 @@ import {
 import _ from "lodash";
 import { AuthContext } from "../contexts";
 import { addDocument, queryDocuments } from "../../../utils";
-import { Room, RoomType, User } from "../types/types";
+import { RoomEntity, RoomType } from "../types/types";
 
 interface UserOption {
   label: string;
@@ -117,21 +117,24 @@ export default function AddDirectMessageModal() {
     }
 
     // get direct message of current users
-    const docs = await queryDocuments<Room>("rooms", [
+    const docs = await queryDocuments<RoomEntity>("rooms", [
       where("type", "==", RoomType.DIRECT_MESSAGE),
       where("memberIds", "array-contains", user.uid),
     ]);
 
     // check if direct message existed
-    const isDirectMessageExisted = _.some(docs, (doc: Room) =>
+    const isDirectMessageExisted = _.some(docs, (doc: RoomEntity) =>
       _.includes(doc.memberIds, selectedUserId)
     );
 
     if (!isDirectMessageExisted) {
       const memberIds = [user.uid, selectedUserId];
 
-      addDocument<Room>("rooms", {
+      console.log(selectedUserOption.label);
+
+      addDocument<RoomEntity>("rooms", {
         memberIds,
+        name: `${user.displayName},${selectedUserOption.label[1]}`,
         type: RoomType.DIRECT_MESSAGE,
       });
     }

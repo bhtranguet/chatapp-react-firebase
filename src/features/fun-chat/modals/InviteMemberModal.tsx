@@ -3,17 +3,10 @@ import { Form, Modal, Select, Spin, Avatar } from "antd";
 import { debounce } from "lodash";
 import { AppContext } from "../contexts/AppProvider";
 import { db } from "../../../configs/firebaseSetup";
-import {
-  query,
-  collection,
-  where,
-  orderBy,
-  limit,
-  getDocs,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
+import { where, orderBy, limit, doc, updateDoc } from "firebase/firestore";
 import _ from "lodash";
+import { queryDocuments } from "../../../utils";
+import { UserEntity } from "../types/types";
 
 interface UserOption {
   label: string;
@@ -83,27 +76,23 @@ async function fetchUserList(
   search: string,
   curMembers: string[]
 ): Promise<UserOption[]> {
-  const users: UserOption[] = [];
-
-  const q = query(
-    collection(db, "users"),
+  const users = await queryDocuments<UserEntity>("users", [
     where("keywords", "array-contains", search?.toLowerCase()),
     orderBy("createdAt"),
-    limit(20)
-  );
+    limit(20),
+  ]);
 
-  const querySnapshot = await getDocs(q);
-  querySnapshot.forEach((doc) => {
-    if (!curMembers.includes(doc.data().uid)) {
-      users.push({
-        label: doc.data().displayName,
-        value: doc.data().uid,
-        photoURL: doc.data().photoURL,
-      });
-    }
-  });
+  const userOptions = users
+    .filter((u) => !_.includes(curMembers, u.uid))
+    .map((u) => {
+      return {
+        label: u.displayName || "",
+        value: u.uid,
+        photoURL: u.photoURL || "",
+      } as UserOption;
+    });
 
-  return users;
+  return userOptions;
 }
 
 export default function InviteMemberModal() {
@@ -125,8 +114,8 @@ export default function InviteMemberModal() {
     const roomRef = doc(db, "rooms", selectedRoomId);
 
     await updateDoc(roomRef, {
-      members: [
-        ..._.get(selectedRoom, "members", []),
+      memberIds: [
+        ..._.get(selectedRoom, "memberIds", []),
         ...value.map((val) => val.value),
       ],
     });
@@ -161,7 +150,7 @@ export default function InviteMemberModal() {
             fetchOptions={fetchUserList}
             onChange={(newValue: any) => setValue(newValue)}
             style={{ width: "100%" }}
-            curMembers={_.get(selectedRoom, "members", [])}
+            curMembers={_.get(selectedRoom, "memberIds", [])}
           />
         </Form>
       </Modal>

@@ -1,4 +1,4 @@
-import { PlusSquareOutlined } from "@ant-design/icons";
+import { CaretDownFilled, PlusSquareOutlined } from "@ant-design/icons";
 import { Button, Typography } from "antd";
 import { useContext } from "react";
 import { AppContext } from "../../../../../contexts/AppProvider";
@@ -10,10 +10,11 @@ function RoomList() {
   return (
     <>
       <div className="text-white px-4 py-3 border-t">
+        <CaretDownFilled className="mr-2" />
         Danh sách các phòng
         <div className="pl-4 pt-4">
           {rooms.map((room, index) => (
-            <>
+            <div key={index}>
               {selectedRoomId === _.get(room, "id") ? (
                 <>
                   <Typography.Text
@@ -35,7 +36,7 @@ function RoomList() {
                   </Typography.Text>
                 </>
               )}
-            </>
+            </div>
           ))}
           <Button
             type="text"

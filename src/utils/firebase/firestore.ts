@@ -3,7 +3,7 @@ import {
   collection,
   getDocs,
   query,
-  QueryFieldFilterConstraint,
+  QueryConstraint,
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../../configs/firebaseSetup";
@@ -23,7 +23,7 @@ async function addDocument<T>(collectionName: string, data: Partial<T>) {
 
 async function queryDocuments<T>(
   collectionName: string,
-  conditions: QueryFieldFilterConstraint[],
+  conditions: QueryConstraint[],
   pathSegments: string[] = []
 ) {
   const q = query(
