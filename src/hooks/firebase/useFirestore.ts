@@ -6,7 +6,7 @@ import {
   onSnapshot,
   orderBy,
   query,
-  where,
+  QueryFieldFilterConstraint,
   WhereFilterOp,
 } from "firebase/firestore";
 
@@ -16,18 +16,17 @@ export interface QueryCondition {
   compareValue: any;
 }
 
-function useFirestore(collectionName: string, condition: QueryCondition) {
-  const [documents, setDocuments] = useState<object[]>([]);
+function useFirestore<T>(
+  collectionName: string,
+  conditions: QueryFieldFilterConstraint[],
+  pathSegments: Array<string> = []
+) {
+  const [documents, setDocuments] = useState<T[]>([]);
 
   useEffect(() => {
-    if (!condition.compareValue || !condition.compareValue.length) {
-      // reset documents data
-      setDocuments([]);
-      return;
-    }
     const q = query(
-      collection(db, collectionName),
-      where(condition.fieldName, condition.operator, condition.compareValue),
+      collection(db, collectionName, ...pathSegments),
+      ...conditions,
       orderBy("createdAt")
     );
     const unsubscrible = onSnapshot(q, (querySnapshot) => {
@@ -35,13 +34,13 @@ function useFirestore(collectionName: string, condition: QueryCondition) {
         return {
           ...doc.data(),
           id: doc.id,
-        };
+        } as T;
       });
 
       setDocuments(documents);
     });
     return unsubscrible;
-  }, [collectionName, condition]);
+  }, [collectionName, conditions]);
 
   return documents;
 }

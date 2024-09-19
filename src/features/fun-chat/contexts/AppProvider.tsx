@@ -4,6 +4,8 @@ import useFirestore, {
   QueryCondition,
 } from "../../../hooks/firebase/useFirestore";
 import _ from "lodash";
+import { Room, User } from "../types/types";
+import { where } from "firebase/firestore";
 
 interface AppProviderProps {
   children: ReactNode;
@@ -14,11 +16,14 @@ interface AppContextValue {
   setIsAddRoomModalOpen: (value: boolean) => void;
   isInviteMemberModalOpen: boolean;
   setIsInviteMemberModalOpen: (value: boolean) => void;
-  selectedRoom: object;
+  addDirectMessageModalOpen: boolean;
+  setAddDirectMessageModalOpen: (value: boolean) => void;
+  selectedRoom?: Room;
   selectedRoomId: string;
   setSelectedRoomId: (value: string) => void;
-  rooms: Array<object>;
-  members: Array<object>;
+  rooms: Array<Room>;
+  directMessages: Array<Room>;
+  members: Array<User>;
 }
 
 export const AppContext = createContext<AppContextValue>({
@@ -26,10 +31,13 @@ export const AppContext = createContext<AppContextValue>({
   setIsAddRoomModalOpen: () => {},
   isInviteMemberModalOpen: false,
   setIsInviteMemberModalOpen: () => {},
-  selectedRoom: {},
+  addDirectMessageModalOpen: false,
+  setAddDirectMessageModalOpen: () => {},
+  selectedRoom: undefined,
   selectedRoomId: "",
   setSelectedRoomId: () => {},
   rooms: [],
+  directMessages: [],
   members: [],
 });
 
@@ -39,40 +47,33 @@ function AppProvider({ children }: AppProviderProps) {
   const [isInviteMemberModalOpen, setIsInviteMemberModalOpen] =
     useState<boolean>(false);
 
+  const [addDirectMessageModalOpen, setAddDirectMessageModalOpen] =
+    useState<boolean>(false);
+
   const [selectedRoomId, setSelectedRoomId] = useState<string>("");
 
   const {
     user: { uid },
   } = useContext(AuthContext);
 
-  const roomsCondition = useMemo(() => {
-    return {
-      fieldName: "members",
-      operator: "array-contains",
-      compareValue: uid,
-    } as QueryCondition;
-  }, [uid]);
-
-  console.log("uuid", uid);
-
-  const rooms = useFirestore("rooms", roomsCondition);
-
-  console.log("rooms", rooms);
+  const rooms = useFirestore<Room>(
+    "rooms",
+    useMemo(() => [where("members", "array-contains", uid)], [uid])
+  );
 
   const selectedRoom = useMemo(
-    () => rooms.find((room) => _.get(room, "id") === selectedRoomId) || {},
+    () =>
+      rooms.find((room) => _.get(room, "id") === selectedRoomId) || undefined,
     [rooms, selectedRoomId]
   );
 
-  const usersCondition = useMemo(() => {
-    return {
-      fieldName: "uid",
-      operator: "in",
-      compareValue: _.get(selectedRoom, "members"),
-    } as QueryCondition;
-  }, [_.get(selectedRoom, "members")]);
-
-  const members = useFirestore("users", usersCondition);
+  const members = useFirestore<User>(
+    "users",
+    useMemo(
+      () => [where("uid", "in", selectedRoom?.memberIds)],
+      [selectedRoom?.memberIds]
+    )
+  );
 
   return (
     <>
@@ -82,10 +83,13 @@ function AppProvider({ children }: AppProviderProps) {
           setIsAddRoomModalOpen,
           isInviteMemberModalOpen,
           setIsInviteMemberModalOpen,
+          addDirectMessageModalOpen,
+          setAddDirectMessageModalOpen,
           selectedRoom,
           selectedRoomId,
           setSelectedRoomId,
           rooms,
+          directMessages,
           members,
         }}
       >

@@ -3,6 +3,7 @@ import { AuthProvider } from "./contexts";
 import AppProvider from "./contexts/AppProvider";
 import AddRoomModal from "./modals/AddRoomModal";
 import InviteMemberModal from "./modals/InviteMemberModal";
+import AddDirectMessageModal from "./modals/AddDirectMessageModal";
 
 export function FunChatRoot() {
   return (
@@ -12,6 +13,7 @@ export function FunChatRoot() {
           <Outlet />
           <AddRoomModal />
           <InviteMemberModal />
+          <AddDirectMessageModal />
         </AppProvider>
       </AuthProvider>
     </>

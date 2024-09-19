@@ -16,6 +16,8 @@ export default function Login() {
     const { user, providerId } = userCredential;
     const additionalUserInfo = getAdditionalUserInfo(userCredential);
 
+    console.log(user.photoURL);
+
     if (additionalUserInfo?.isNewUser) {
       await addDocument("users", {
         displayName: user.displayName,

@@ -4,16 +4,22 @@ import { Button, Form, Input, Modal } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { addDocument } from "../../../utils";
 import { AuthContext } from "../contexts";
+import { Room } from "../types/types";
 
 type FieldType = {
   name: string;
   description?: string;
 };
 
+type AddRoomFormData = {
+  name: string;
+  description: string;
+};
+
 function AddRoomModal() {
   const { isAddRoomModalOpen, setIsAddRoomModalOpen } = useContext(AppContext);
   const [submittable, setSubmittable] = useState<boolean>(false);
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<AddRoomFormData>();
   const { user } = useContext(AuthContext);
 
   const values = Form.useWatch([], form);
@@ -25,9 +31,9 @@ function AddRoomModal() {
       .catch(() => setSubmittable(false));
   }, [form, values]);
 
-  const handleOk = () => {
+  const handleOk = async () => {
     const formData = form.getFieldsValue();
-    addDocument("rooms", { ...formData, members: [user.uid] });
+    addDocument<Room>("rooms", { ...formData, memberIds: [user.uid] });
     setIsAddRoomModalOpen(false);
     form.resetFields();
   };

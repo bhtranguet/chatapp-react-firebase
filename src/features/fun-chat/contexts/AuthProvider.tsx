@@ -6,7 +6,9 @@ import { Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext<{ user: User }>({
-  user: {},
+  user: {
+    uid: "",
+  },
 });
 
 interface AuthProviderProps {
@@ -16,12 +18,14 @@ interface AuthProviderProps {
 interface User {
   displayName?: string | null;
   email?: string | null;
-  uid?: string | null;
+  uid: string;
   photoURL?: string | null;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User>({});
+  const [user, setUser] = useState<User>({
+    uid: "",
+  });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 

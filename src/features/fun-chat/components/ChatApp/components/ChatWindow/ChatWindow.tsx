@@ -32,7 +32,7 @@ function ChatWindow() {
     [_.get(selectedRoom, "id")]
   );
 
-  const messages = useFirestore("messages", condition);
+  const messages = useFirestore("messages", useMemo(() => [], selectedRoom.id));
 
   const handleSendMessage = async () => {
     addDocument("messages", {
